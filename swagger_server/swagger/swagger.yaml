@@ -1,0 +1,167 @@
+---
+swagger: "2.0"
+info:
+  version: "1.0.0"
+  title: "Tic-tac-toe"
+  contact:
+    url: "test"
+  license:
+    name: "All rights reserved "
+schemes:
+- "http"
+consumes:
+- "application/json"
+produces:
+- "application/json"
+paths:
+  /api/v1/games:
+    get:
+      description: "Get all games."
+      operationId: "api_v1_games_get"
+      parameters: []
+      responses:
+        200:
+          description: "Successful response, returns an array of games, returns an\
+            \ empty array if no users found"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/game"
+        400:
+          description: "Bad request"
+        404:
+          description: "Resource not found"
+        500:
+          description: "Internal server error"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+    post:
+      description: "Start a new game."
+      operationId: "api_v1_games_post"
+      parameters:
+      - in: "body"
+        name: "game"
+        required: true
+        schema:
+          $ref: "#/definitions/game"
+      responses:
+        201:
+          description: "Game successfully started"
+          schema:
+            $ref: "#/definitions/inline_response_201"
+          headers:
+            Location:
+              type: "string"
+              description: "URL of the started game"
+        400:
+          description: "Bad request"
+          schema:
+            $ref: "#/definitions/inline_response_400"
+        404:
+          description: "Resource not found"
+        500:
+          description: "Internal server error"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+  /api/v1/games/{game_id}:
+    get:
+      description: "Get a game."
+      operationId: "api_v1_games_game_id_get"
+      parameters:
+      - name: "game_id"
+        in: "path"
+        description: "Game id"
+        required: true
+        type: "string"
+        format: "uuid"
+      responses:
+        200:
+          description: "Successful response, returns the game"
+          schema:
+            $ref: "#/definitions/game"
+        400:
+          description: "Bad request"
+        404:
+          description: "Resource not found"
+        500:
+          description: "Internal server error"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+    put:
+      description: "Post a new move to a game."
+      operationId: "api_v1_games_game_id_put"
+      parameters:
+      - name: "game_id"
+        in: "path"
+        description: "Game id"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "game"
+        required: true
+        schema:
+          $ref: "#/definitions/game"
+      responses:
+        200:
+          description: "Move successfully registered, also provide backend's response\
+            \ move in response"
+          schema:
+            $ref: "#/definitions/game"
+        400:
+          description: "Bad request"
+          schema:
+            $ref: "#/definitions/inline_response_400"
+        404:
+          description: "Resource not found"
+        500:
+          description: "Internal server error"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+    delete:
+      description: "Delete a game."
+      operationId: "api_v1_games_game_id_delete"
+      parameters:
+      - name: "game_id"
+        in: "path"
+        description: "Game id"
+        required: true
+        type: "string"
+        format: "uuid"
+      responses:
+        200:
+          description: "Game successfully deleted"
+        400:
+          description: "Bad request"
+        404:
+          description: "Resource not found"
+        500:
+          description: "Internal server error"
+      x-swagger-router-controller: "swagger_server.controllers.default_controller"
+definitions:
+  game:
+    type: "object"
+    required:
+    - "board"
+    properties:
+      board:
+        type: "string"
+        example: "XO--X--OX"
+        description: "The board state"
+      status:
+        type: "string"
+        description: "The game status, read-only, the client can not POST or PUT this"
+        readOnly: true
+        enum:
+        - "RUNNING"
+        - "X_WON"
+        - "O_WON"
+        - "DRAW"
+    description: "A game object"
+  inline_response_201:
+    properties:
+      location:
+        type: "string"
+        format: "uuid"
+        description: "URL of the started game"
+  inline_response_400:
+    properties:
+      reason:
+        type: "string"
+        description: "Why the game failed to start"
